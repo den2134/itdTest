@@ -1,0 +1,12 @@
+{% block content %}
+
+    <form action="{{ url('put_article', {'id': id}) }}" method="POST" {{ form_enctype(form) }}>
+        <input type="hidden" name="_method" value="put" />
+
+        {{ form_widget(form) }}
+
+        <input type="submit" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
+    </form>
+{% endblock %}
+
+{% set code = code(_self) %}

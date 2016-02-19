@@ -1,0 +1,10 @@
+<ul>
+    {% for e in ent %}
+        <li>
+        {{ e.id }}
+        {{ e.title }}
+        {{ e.text }}
+        {{ e.createData|date("m/d/Y") }}
+        </li>
+    {% endfor %}
+</ul>

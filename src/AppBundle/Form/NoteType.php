@@ -11,7 +11,7 @@ class NoteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('message', 'textarea', array(
-            'description' => 'A brief record of points or ideas written down as an aid to memory',
+            'description' => 'A brief record of poin   ts or ideas written down as an aid to memory',
         ));
     }
 

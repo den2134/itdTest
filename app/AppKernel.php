@@ -22,7 +22,9 @@ class AppKernel extends Kernel
             new FOS\HttpCacheBundle\FOSHttpCacheBundle(),
             new Bazinga\Bundle\HateoasBundle\BazingaHateoasBundle(),
             new Hautelook\TemplatedUriBundle\HautelookTemplatedUriBundle(),
+            new Voryx\RESTGeneratorBundle\VoryxRESTGeneratorBundle(),
             new Bazinga\Bundle\RestExtraBundle\BazingaRestExtraBundle(),
+            new ItdBundle\ItdBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

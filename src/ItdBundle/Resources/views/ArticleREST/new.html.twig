@@ -1,0 +1,16 @@
+{% block content_header '' %}
+
+{% block content %}
+
+    {%  if (form is defined) %}
+        <form action="{{ url('post_article') }}" method="POST" {{ form_enctype(form) }}>
+
+            {{ form_widget(form) }}
+
+            <input type="submit" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
+        </form>
+    {% endif %}
+
+{% endblock %}
+
+{% set code = code(_self) %}
