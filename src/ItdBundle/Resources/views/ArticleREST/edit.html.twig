@@ -1,12 +1,31 @@
-{% block content %}
-    <p>Edit</p>
-    <form action="{{ url('put_article', {'id': id}) }}" method="POST" {{ form_enctype(form) }}>
-        <input type="hidden" name="_method" value="put" />
+{% extends "ItdBundle::layout.html.twig" %}
 
-        {{ form_widget(form) }}
+{% block body %}
+<div class="container">
+    <div class="col-md-8">
+        <form action="{{ url('put_article', {'id': id}) }}" method="POST" {{ form_enctype(form) }}>
+            <input type="hidden" name="_method" value="put" />
 
-        <input type="submit" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
-    </form>
+            <h3>Edit article</h3>
+            <hr>
+            <div class="form-group">
+                <label for="form_title">Title</label>
+                {{ form_widget(form.title, { 'attr': {'class': 'form-control'} }) }}
+                <label for="form_text">Text</label>
+                {{ form_widget(form.text, { 'attr': {'class': 'form-control'}}) }}
+                <div id="itdbundle_article_createData">
+                    <label for="itdbundle_article_createData">Set data</label>{{ form_widget(form.createData) }}
+                </div>
+                <hr>
+                <label for="form_name">Editor name</label>
+                {{ form_widget(form.nameTag) }}
+                <br>
+            </div>
+
+            <input type="submit" class="btn btn-success" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% set code = code(_self) %}

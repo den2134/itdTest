@@ -13,6 +13,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class article_teg{
 
+
+    // Нужно добавить для этой таблицы фореин кеи, потому что они не создаются
+
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")

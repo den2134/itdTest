@@ -153,7 +153,7 @@ class Article
         $this->tags = $tags;
     }
 
-    protected $nameTag;
+    public $nameTag;
 
     public function setNameTag($nameTag)
     {
@@ -163,11 +163,5 @@ class Article
     public function getNameTag()
     {
         return $this->nameTag;
-    }
-
-    public function removeTags(Tag $schema){
-        $this->tags->removeElement($schema);
-
-        return $this;
     }
 }

@@ -1,8 +1,17 @@
-<ul>
-        <li>
-            {{ ent.id }}
-            {{ ent.title }}
-            {{ ent.text }}
-            {{ ent.createData|date("m/d/Y") }}
-        </li>
-</ul>
+{% extends "ItdBundle::layout.html.twig" %}
+
+{% block body %}
+<div class="container">
+    <div class="col-md-12 table-responsive">
+            <h3>Article #{{ ent.id }}</h3>
+            <h3>Title</h3>
+            <p>{{ ent.title }}</p>
+            <h3>Text</h3>
+            <p>{{ ent.text }}</p>
+            <h3>Created data</h3>
+            <p>{{ ent.createData|date("m/d/Y") }}</p>
+            <h3>Autors</h3>
+            <p>{{ ent.nameTag }}</p>
+    </div>
+</div>
+    {% endblock %}

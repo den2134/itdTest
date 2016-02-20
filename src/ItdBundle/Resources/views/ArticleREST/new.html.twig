@@ -1,18 +1,32 @@
+{% extends "ItdBundle::layout.html.twig" %}
 
-
-{% block content_header '' %}
-
-{% block content %}
-
+{% block body %}
+<div class="container">
+    <div class="col-md-8">
     {%  if (form is defined) %}
         <form action="{{ url('post_article') }}" method="POST" {{ form_enctype(form) }}>
+            <h3>Add a new article</h3>
+            <hr>
+            <div class="form-group">
+                <label for="form_title">Title</label>
+                <input class="form-control" type="text" id="form_title" name="itdbundle_article[title]" required="required" /><br>
+                <label for="form_text">Text</label>
+                <textarea class="form-control" name="itdbundle_article[text]" id="form_text" cols="30" rows="10"></textarea>
+                <div id="itdbundle_article_createData">
+                    <label for="">Set data</label>{{ form_widget(form.createData) }}
+                </div>
+                <hr>
+                <p class="descr">Add a few names can be separated by commas:<span class="descr-sub">name1, another name, another name2</span></p>
+                <label for="form_name">Name</label>
+                <input type="text" id="form_name" name="itdbundle_article[nameTag]">
+                <br>
+            </div>
 
-            <div>{{ form_widget(form) }}</div>
-
-            <input type="submit" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
+            <input type="submit" class="btn btn-success" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
         </form>
     {% endif %}
-
+    </div>
+</div>
 {% endblock %}
 
 {% set code = code(_self) %}

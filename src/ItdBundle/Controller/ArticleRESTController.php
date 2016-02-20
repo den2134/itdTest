@@ -33,11 +33,25 @@ class ArticleRESTController extends FOSRestController
      * @View(serializerEnableMaxDepthChecks=true)
      *
      * @return Response
-     *
+     * @param $id
+     * @return array
      */
-    public function getAction(Article $entity)
+    public function getAction($id)
     {
-        return array('ent' => $entity);
+        $article = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
+        $query = $this->getDoctrine()->getManager()->createQuery(
+            'SELECT t.name FROM ItdBundle:article_teg as at JOIN ItdBundle:Tag as t WITH t.id = at.tag_id WHERE at.article_id = :id'
+        )->setParameter('id', $id);
+
+        $name = $query->getResult();
+
+        // Добавляем имена, которые связаны с таблицей Article
+
+        foreach($name as $val) {
+            $article->setNameTag($article->getNameTag().$val['name'].', ');
+        }
+
+        return array('ent' => $article);
     }
     /**
      * Get all Article entities.
@@ -48,22 +62,20 @@ class ArticleRESTController extends FOSRestController
      *
      * @return Response
      *
-     * @QueryParam(name="offset", requirements="\d+", nullable=true, description="Offset from which to start listing notes.")
-     * @QueryParam(name="limit", requirements="\d+", default="20", description="How many notes to return.")
-     * @QueryParam(name="order_by", nullable=true, array=true, description="Order by fields. Must be an array ie. &order_by[name]=ASC&order_by[description]=DESC")
-     * @QueryParam(name="filters", nullable=true, array=true, description="Filter by fields. Must be an array ie. &filters[id]=3")
      */
     public function cgetAction(ParamFetcherInterface $paramFetcher)
     {
         try {
-            $offset = $paramFetcher->get('offset');
-            $limit = $paramFetcher->get('limit');
-            $order_by = $paramFetcher->get('order_by');
-            $filters = !is_null($paramFetcher->get('filters')) ? $paramFetcher->get('filters') : array();
-
             $em = $this->getDoctrine()->getManager();
-            $entities = $em->getRepository('ItdBundle:Article')->findAll();
-            return array('ent' => $entities);
+            $articles = $em->getRepository('ItdBundle:Article')->findAll();
+
+            // Добавляем в input имена, которые связаны с таблицей Article
+            /*
+            foreach($name as $val) {
+                $article->setNameTag($article->getNameTag().$val['name']);
+            }*/
+
+            return array('ent' => $articles);
 
         } catch (\Exception $e) {
             return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
@@ -136,30 +148,53 @@ class ArticleRESTController extends FOSRestController
     public function postAction(Request $request)
     {
         $entity = new Article();
-        $tags = new Tag();
-        $a_t = new article_teg();
 
         $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-            $tags->name = $entity->getNameTag();
+            // Превращаем строку с именами на массив, а также удаляем пробелы
+            $names = $entity->getNameTag();
+            $names = preg_replace('/\s/','',$names);
+            $arr[] = explode(',',$names);
+
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
-            $em->persist($tags);
             $em->flush();
 
-            // Add to article_tag db
+            // Добавляем связь для нашего набора имен с ід статьи
 
-            $a_t->setArticle($entity->getId());
-            $a_t->setTag($tags->getId());
-            $em->persist($a_t);
-            $em->flush();
+            $articleID = $entity->getId();
+            $this->addNamesToArtticle($articleID, $arr);
 
             return $this->routeRedirectView('get_articles');
         }
 
         return FOSView::create(array('errors' => $form->getErrors()), Codes::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * @param $articleID
+     * @param $arr
+     * Создает связи в таблице для каждого имени(Tag.id) к Article.id
+     */
+
+    public function addNamesToArtticle($articleID, $arr){
+        foreach($arr as $val) {
+            foreach($val as $name) {
+                $em = $this->getDoctrine()->getManager();
+                $tags = new Tag();
+                $tags->setName($name);
+                $em->persist($tags);
+                $em->flush();
+
+                $a_t = new article_teg();
+                $a_t->setTag($tags->getId());
+                $a_t->setArticle($articleID);
+                $em->persist($a_t);
+                $em->flush();
+            }
+        }
     }
 
     /**
@@ -176,17 +211,17 @@ class ArticleRESTController extends FOSRestController
             throw $this->createNotFoundException("Articles does not exist.");
         }
 
-        //$names = $this->getDoctrine()->getRepository('ItdBundle:article_teg')->findBy(array('article_id' => $id));
-
         $query = $this->getDoctrine()->getManager()->createQuery(
             'SELECT t.name FROM ItdBundle:article_teg as at JOIN ItdBundle:Tag as t WITH t.id = at.tag_id WHERE at.article_id = :id'
         )->setParameter('id', $id);
 
         $name = $query->getResult();
 
+        // Добавляем в input имена, которые связаны с таблицей Article
+        /*
         foreach($name as $val) {
-            $article->setNameTag($val['name']);
-        }
+            $article->setNameTag($article->getNameTag().$val['name']);
+        }*/
         $form = $this->createForm(new ArticleType(), $article);
 
         return array('form' => $form, 'id' => $id);
@@ -203,30 +238,42 @@ class ArticleRESTController extends FOSRestController
      * @return Response
      */
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return FOSView
+     */
+
     public function putAction(Request $request, $id)
     {
         $entity = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
 
-        $query = $this->getDoctrine()->getManager()->createQuery(
+      /*  $query = $this->getDoctrine()->getManager()->createQuery(
             'SELECT t.id FROM ItdBundle:article_teg as at JOIN ItdBundle:Tag as t WITH t.id = at.tag_id WHERE at.article_id = :id'
         )->setParameter('id', $id);
 
-        $tagID = $query->getResult();
+        $tagID = $query->getResult();*/
 
-        $tag = $this->getDoctrine()->getRepository('ItdBundle:Tag')->find($tagID[0]['id']);
+        $tag = new Tag();//$this->getDoctrine()->getRepository('ItdBundle:Tag')->find($tagID[0]['id']);
 
         try {
-            $em = $this->getDoctrine()->getManager();
             $request->setMethod('PATCH');
             $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
-            //$this->removeExtraFields($request, $form);
             $form->handleRequest($request);
+            $em = $this->getDoctrine()->getManager();
 
             if ($form->isValid()) {
                 $tag->setName($entity->getNameTag());
+                $em->persist($tag);
                 $em->flush();
 
-                return $entity;
+                $a_t = new article_teg();
+                $a_t->setTag($tag->getId());
+                $a_t->setArticle($id);
+                $em->persist($a_t);
+                $em->flush();
+
+                return $this->routeRedirectView('get_articles');
             }
 
             return FOSView::create(array('errors' => $form->getErrors()), Codes::HTTP_INTERNAL_SERVER_ERROR);

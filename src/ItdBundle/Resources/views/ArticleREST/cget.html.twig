@@ -1,10 +1,36 @@
-<ul>
-    {% for e in ent %}
-        <li>
-        {{ e.id }}
-        {{ e.title }}
-        {{ e.text }}
-        {{ e.createData|date("m/d/Y") }}
-        </li>
-    {% endfor %}
-</ul>
+{% extends "ItdBundle::layout.html.twig" %}
+
+{% block body %}
+    <div class="container">
+        <div class="col-md-12 table-responsive">
+            <h3>Show all articles</h3>
+            <table class="table table-striped">
+                <tr>
+                    <td><b>Id</b></td>
+                    <td><b>Title</b></td>
+                    <td><b>Text</b></td>
+                    <td><b>Data</b></td>
+                    <td><b>Operation</b></td>
+                </tr>
+                    {% for e in ent %}
+                        <tr>
+                            <td>{{ e.id }}</td>
+                            <td>{{ e.title }}</td>
+                            <td>{{ e.text }}</td>
+                            <td>{{ e.createData|date("m/d/Y") }}</td>
+                            <td>
+                            <ul>
+                                <li>
+                                    [<a href="{{ path('get_article', {'id': e.id}) }}">{{ 'Show'|trans({}, 'ItdBundle') }}</a>]
+                                    [<a href="{{ path('edit_article', {'id': e.id}) }}">{{ 'Edit'|trans({}, 'ItdBundle') }}</a>]
+                                    [<a href="{{ path('remove_article', {'id': e.id}) }}">{{ 'Remove'|trans({}, 'ItdBundle') }}</a>]
+                                </li>
+                            </ul>
+                            </td>
+                    {% endfor %}
+                </tr>
+            </table>
+            <p> <b><a href="{{ path('new_article') }}">Add new article</a></b> </p>
+        </div>
+    </div>
+{% endblock %}
