@@ -13,7 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Article
 {
     /**
-     * @ORM\Id
+     * @var int|null
+     * @ORM\Id()
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="smallint")
      */
@@ -22,28 +23,24 @@ class Article
 
     /**
      * @var \Doctrine\Common\Collections\Collection|Tag[]
-     * * @ORM\ManyToMany(targetEntity="Tag", inversedBy="name")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="id")
      * @ORM\JoinTable(
      *  name="article_tag",
      *  joinColumns={
-     *      @ORM\JoinColumn(name="article_id", referencedColumnName="id", cascade={"persist", "remove"})
+     *      @ORM\JoinColumn(name="article_id", referencedColumnName="id", onDelete="CASCADE")
      *  },
      *  inverseJoinColumns={
-     *      @ORM\JoinColumn(name="name", referencedColumnName="name", cascade={"persist", "remove"})
+     *      @ORM\JoinColumn(name="tag_id", referencedColumnName="id", onDelete="CASCADE")
      *  }
      * )
      */
 
-    /**
-     * @var
-     */
-
-    protected $tags;
+    /*protected $tags;
 
     public function __construct()
     {
         $this->tags = new ArrayCollection();
-    }
+    }*/
 
 
     /**
@@ -166,5 +163,11 @@ class Article
     public function getNameTag()
     {
         return $this->nameTag;
+    }
+
+    public function removeTags(Tag $schema){
+        $this->tags->removeElement($schema);
+
+        return $this;
     }
 }

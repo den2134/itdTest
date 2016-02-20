@@ -20,7 +20,6 @@ class ArticleType extends AbstractType
             ->add('text')
             ->add('createData')
         ;
-        $builder->add('tags', 'collection', array('type' => TagType::class));
         $builder->add('nameTag');
     }
     

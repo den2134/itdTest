@@ -97,15 +97,14 @@ class ArticleRESTController extends FOSRestController
      */
     public function deleteAction(Request $request, $id)
     {
-        $deleted = $this->getDoctrine()->getRepository('ItdBundle:article_teg')->findBy(array('article_id' => $id));
-
+        $deleted = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
         try {
-            die();
             $em = $this->getDoctrine()->getManager();
             $em->remove($deleted);
             $em->flush();
 
-            return null;
+            return $this->routeRedirectView('get_articles');
+
         } catch (Exception $e) {
             return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -144,7 +143,7 @@ class ArticleRESTController extends FOSRestController
         $form->handleRequest($request);
 
         if ($form->isValid()) {
-            $tags->setName($entity->getNameTag());
+            $tags->name = $entity->getNameTag();
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->persist($tags);
@@ -153,7 +152,7 @@ class ArticleRESTController extends FOSRestController
             // Add to article_tag db
 
             $a_t->setArticle($entity->getId());
-            $a_t->setName($tags->getName());
+            $a_t->setTag($tags->getId());
             $em->persist($a_t);
             $em->flush();
 
@@ -180,9 +179,7 @@ class ArticleRESTController extends FOSRestController
         //$names = $this->getDoctrine()->getRepository('ItdBundle:article_teg')->findBy(array('article_id' => $id));
 
         $query = $this->getDoctrine()->getManager()->createQuery(
-            'SELECT at.name
-              FROM ItdBundle:article_teg as at
-              WHERE at.article_id = :id'
+            'SELECT t.name FROM ItdBundle:article_teg as at JOIN ItdBundle:Tag as t WITH t.id = at.tag_id WHERE at.article_id = :id'
         )->setParameter('id', $id);
 
         $name = $query->getResult();
@@ -209,15 +206,15 @@ class ArticleRESTController extends FOSRestController
     public function putAction(Request $request, $id)
     {
         $entity = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
+
         $query = $this->getDoctrine()->getManager()->createQuery(
-            'SELECT at.name
-              FROM ItdBundle:article_teg as at
-              WHERE at.article_id = :id'
+            'SELECT t.id FROM ItdBundle:article_teg as at JOIN ItdBundle:Tag as t WITH t.id = at.tag_id WHERE at.article_id = :id'
         )->setParameter('id', $id);
 
         $tagID = $query->getResult();
 
-        $tag = $this->getDoctrine()->getRepository('ItdBundle:Tag')->find($tagID[0]['name']);
+        $tag = $this->getDoctrine()->getRepository('ItdBundle:Tag')->find($tagID[0]['id']);
+
         try {
             $em = $this->getDoctrine()->getManager();
             $request->setMethod('PATCH');

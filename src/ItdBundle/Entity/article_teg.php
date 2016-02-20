@@ -17,23 +17,21 @@ class article_teg{
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
+     * @var integer $id
      */
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Article", inversedBy="id")
-     * @ORM\JoinColumn(name="aticle_id", referencedColumnName="id", onDelete="CASCADE")
      * @ORM\Column(type="smallint")
      */
     public $article_id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tag", inversedBy="name")
-     * @ORM\JoinColumn(name="name", referencedColumnName="name", onDelete="CASCADE")
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="smallint")
      */
 
-    public $name;
+    public $tag_id;
 
 
     /**
@@ -77,9 +75,9 @@ class article_teg{
      *
      * @return article_teg
      */
-    public function setName($tag)
+    public function setTag($tag)
     {
-        $this->name = $tag;
+        $this->tag_id = $tag;
 
         return $this;
     }
@@ -89,8 +87,8 @@ class article_teg{
      *
      * @return \ItdBundle\Entity\Tag
      */
-    public function getName()
+    public function getTag()
     {
-        return $this->name;
+        return $this->tag;
     }
 }

@@ -4,7 +4,6 @@ namespace ItdBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\AccessType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @ORM\Entity()
@@ -14,12 +13,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Tag
 {
     /**
-     * @ORM\ManyToMany(targetEntity="Article", mappedBy="tags", cascade={"persist", "remove"}")
-     * @ORM\JoinTable(name="article_tag")
+     * @var int|null
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="smallint", name="id")
      */
+    private $id;
 
     /**
-     * @var ArrayCollection
+     * @var \Doctrine\Common\Collections\Collection|Article[]
+     * @ORM\ManyToMany(targetEntity="Article", mappedBy="tags")
      */
 
     protected $articles;
@@ -34,9 +37,19 @@ class Tag
 
     /**
      *
-     * @ORM\Id @ORM\Column(type="string", length=100)
+     * @ORM\Column(type="string", length=100)
      */
     public $name;
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * Add article
