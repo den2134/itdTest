@@ -11,3 +11,8 @@ itd:
 NelmioApiDocBundle:
   resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
   prefix:   /api/doc
+
+Itd_Tag_api:
+        resource: "@ItdBundle/Controller/TagRESTController.php"
+        type:   rest
+        prefix:   /api

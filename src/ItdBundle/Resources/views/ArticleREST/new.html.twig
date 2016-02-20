@@ -1,3 +1,5 @@
+
+
 {% block content_header '' %}
 
 {% block content %}
@@ -6,6 +8,9 @@
         <form action="{{ url('post_article') }}" method="POST" {{ form_enctype(form) }}>
 
             {{ form_widget(form) }}
+            {% for tag in form.tags %}
+
+            {% endfor %}
 
             <input type="submit" value="{% trans from 'ItdBundle' %}Submit{% endtrans %}">
         </form>

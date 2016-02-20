@@ -4,24 +4,22 @@ namespace ItdBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\AccessType;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/** @ORM\Entity(repositoryClass="TagRepClass")
+/** @ORM\Entity()
  *  @ORM\Table(name="tag")
  */
 
 class Tag
 {
-    /** @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="smallint")
+    /**
+     * @ORM\ManyToMany(targetEntity="Article", mappedBy="tags", cascade={"persist", "remove"}")
+     * @ORM\JoinTable(name="article_tag")
      */
-    private $id;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection|Article[]
-     * @ORM\ManyToMany(targetEntity="Article", mappedBy="tagGroup")
-     * @ORM\JoinTable(name="article_tag")
+     * @var ArrayCollection
      */
 
     protected $articles;
@@ -36,43 +34,9 @@ class Tag
 
     /**
      *
-     * @ORM\Column(type="string", length=100)
+     * @ORM\Id @ORM\Column(type="string", length=100)
      */
-    private $name;
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Tag
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+    public $name;
 
     /**
      * Add article
@@ -109,4 +73,28 @@ class Tag
     }
 
 
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Tag
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 }

@@ -4,6 +4,7 @@ namespace ItdBundle\Controller;
 
 use FOS\RestBundle\Controller\FOSRestController;
 use ItdBundle\Entity\Article;
+use ItdBundle\Entity\article_teg;
 use ItdBundle\Entity\Tag;
 use ItdBundle\Form\ArticleType;
 
@@ -15,6 +16,7 @@ use FOS\RestBundle\Util\Codes;
 use FOS\RestBundle\View\View as FOSView;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,6 +69,61 @@ class ArticleRESTController extends FOSRestController
             return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Partial Update to a Article entity.
+     *
+     * @View(serializerEnableMaxDepthChecks=true)
+     *
+     * @param Request $request
+     * @param $entity
+     *
+     * @return Response
+     */
+
+    public function patchAction(Request $request, Article $entity)
+    {
+        return $this->putAction($request, $entity);
+    }
+    /**
+     * Delete a Article entity.
+     *
+     * @View(statusCode=204)
+     *
+     * @param Request $request
+     * @param $id
+     *
+     * @return Response
+     */
+    public function deleteAction(Request $request, $id)
+    {
+        $deleted = $this->getDoctrine()->getRepository('ItdBundle:article_teg')->findBy(array('article_id' => $id));
+
+        try {
+            die();
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($deleted);
+            $em->flush();
+
+            return null;
+        } catch (Exception $e) {
+            return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @return Form|\Symfony\Component\Form\FormInterface
+     * @View()
+     */
+
+    public function newAction(Request $request)
+    {
+        $entity = new Article();
+        $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
+        $form->handleRequest($request);
+        return $form;
+    }
+
     /**
      * Create a Article entity.
      *
@@ -80,115 +137,30 @@ class ArticleRESTController extends FOSRestController
     public function postAction(Request $request)
     {
         $entity = new Article();
+        $tags = new Tag();
+        $a_t = new article_teg();
+
         $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
-        $this->removeExtraFields($request, $form);
         $form->handleRequest($request);
 
         if ($form->isValid()) {
+            $tags->setName($entity->getNameTag());
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
+            $em->persist($tags);
             $em->flush();
 
-            return array('ent' => $entity);
+            // Add to article_tag db
+
+            $a_t->setArticle($entity->getId());
+            $a_t->setName($tags->getName());
+            $em->persist($a_t);
+            $em->flush();
+
+            return $this->routeRedirectView('get_articles');
         }
 
         return FOSView::create(array('errors' => $form->getErrors()), Codes::HTTP_INTERNAL_SERVER_ERROR);
-    }
-    /**
-     * Update a Article entity.
-     *
-     * @View(serializerEnableMaxDepthChecks=true)
-     *
-     * @param Request $request
-     * @param $id
-     *
-     * @return Response
-     */
-    public function putAction(Request $request, $id)
-    {
-        $entity = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
-        try {
-            $em = $this->getDoctrine()->getManager();
-            $request->setMethod('PATCH'); //Treat all PUTs as PATCH
-            $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
-            $this->removeExtraFields($request, $form);
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $em->flush();
-
-                return $entity;
-            }
-
-            return FOSView::create(array('errors' => $form->getErrors()), Codes::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Exception $e) {
-            return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-     /*   $note = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
-        if (false === $note) {
-            $note = new Article();
-            $note->id = $id;
-            $statusCode = Response::HTTP_CREATED;
-        } else {
-            $statusCode = Response::HTTP_NO_CONTENT;
-        }
-
-        $form = $this->createForm(new Article(), $note);
-
-        $form->submit($request);
-        if ($form->isValid()) {
-            $this->getNoteManager()->set($note);
-
-            return $this->routeRedirectView('get_articles', array('id' => $note->id), $statusCode);
-        }
-
-        return $form;
-    }*/
-    /**
-     * Partial Update to a Article entity.
-     *
-     * @View(serializerEnableMaxDepthChecks=true)
-     *
-     * @param Request $request
-     * @param $entity
-     *
-     * @return Response
-     */
-    public function patchAction(Request $request, Article $entity)
-    {
-        return $this->putAction($request, $entity);
-    }
-    /**
-     * Delete a Article entity.
-     *
-     * @View(statusCode=204)
-     *
-     * @param Request $request
-     * @param $entity
-     *
-     * @return Response
-     */
-    public function deleteAction(Request $request, Article $entity)
-    {
-        try {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($entity);
-            $em->flush();
-
-            return null;
-        } catch (\Exception $e) {
-            return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * @return Form|\Symfony\Component\Form\FormInterface
-     * @View()
-     */
-
-    public function newAction()
-    {
-        return $this->createForm(new ArticleType());
     }
 
     /**
@@ -200,13 +172,80 @@ class ArticleRESTController extends FOSRestController
 
     public function editAction(Request $request, $id)
     {
-        $note = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
-        if (false === $note) {
-            throw $this->createNotFoundException("Note does not exist.");
+        $article = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
+        if (false === $article) {
+            throw $this->createNotFoundException("Articles does not exist.");
         }
 
-        $form = $this->createForm(new ArticleType(), $note);
+        //$names = $this->getDoctrine()->getRepository('ItdBundle:article_teg')->findBy(array('article_id' => $id));
+
+        $query = $this->getDoctrine()->getManager()->createQuery(
+            'SELECT at.name
+              FROM ItdBundle:article_teg as at
+              WHERE at.article_id = :id'
+        )->setParameter('id', $id);
+
+        $name = $query->getResult();
+
+        foreach($name as $val) {
+            $article->setNameTag($val['name']);
+        }
+        $form = $this->createForm(new ArticleType(), $article);
 
         return array('form' => $form, 'id' => $id);
+    }
+
+    /**
+     * Update a Article entity.
+     *
+     * @View(serializerEnableMaxDepthChecks=true)
+     *
+     * @param Request $request
+     * @param $id
+     *
+     * @return Response
+     */
+
+    public function putAction(Request $request, $id)
+    {
+        $entity = $this->getDoctrine()->getRepository('ItdBundle:Article')->find($id);
+        $query = $this->getDoctrine()->getManager()->createQuery(
+            'SELECT at.name
+              FROM ItdBundle:article_teg as at
+              WHERE at.article_id = :id'
+        )->setParameter('id', $id);
+
+        $tagID = $query->getResult();
+
+        $tag = $this->getDoctrine()->getRepository('ItdBundle:Tag')->find($tagID[0]['name']);
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $request->setMethod('PATCH');
+            $form = $this->createForm(new ArticleType(), $entity, array("method" => $request->getMethod()));
+            //$this->removeExtraFields($request, $form);
+            $form->handleRequest($request);
+
+            if ($form->isValid()) {
+                $tag->setName($entity->getNameTag());
+                $em->flush();
+
+                return $entity;
+            }
+
+            return FOSView::create(array('errors' => $form->getErrors()), Codes::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (\Exception $e) {
+            return FOSView::create($e->getMessage(), Codes::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param $id
+     * @return mixed
+     */
+
+    public function removeAction(Request $request, $id)
+    {
+        return $this->deleteAction($request, $id);
     }
 }

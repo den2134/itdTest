@@ -18,7 +18,7 @@ class Article
      * @ORM\Column(type="smallint")
      */
 
-    private $id;
+    public $id;
 
     /**
      * @var \Doctrine\Common\Collections\Collection|Tag[]
@@ -34,15 +34,17 @@ class Article
      * )
      */
 
-    protected $tagGroup;
+    protected $tags;
 
     public function __construct()
     {
-        $this->tagGroup = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
+
 
     /**
      * @ORM\Column(type="string", length=100)
+     * @Assert\NotBlank()
      */
     private $title;
 
@@ -57,4 +59,92 @@ class Article
      * @ORM\Column(type="date")
      */
     private $createData;
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set title
+     *
+     * @param string $title
+     *
+     * @return Article
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set text
+     *
+     * @param string $text
+     *
+     * @return Article
+     */
+    public function setText($text)
+    {
+        $this->text = $text;
+
+        return $this;
+    }
+
+    /**
+     * Get text
+     *
+     * @return string
+     */
+    public function getText()
+    {
+        return $this->text;
+    }
+
+    /**
+     * Set createData
+     *
+     * @param \DateTime $createData
+     *
+     * @return Article
+     */
+    public function setCreateData($createData)
+    {
+        $this->createData = $createData;
+
+        return $this;
+    }
+
+    /**
+     * Get createData
+     *
+     * @return \DateTime
+     */
+    public function getCreateData()
+    {
+        return $this->createData;
+    }
+
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
 }

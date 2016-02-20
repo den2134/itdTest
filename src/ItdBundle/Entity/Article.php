@@ -22,27 +22,33 @@ class Article
 
     /**
      * @var \Doctrine\Common\Collections\Collection|Tag[]
-     * * @ORM\ManyToMany(targetEntity="Tag", inversedBy="id")
+     * * @ORM\ManyToMany(targetEntity="Tag", inversedBy="name")
      * @ORM\JoinTable(
      *  name="article_tag",
      *  joinColumns={
-     *      @ORM\JoinColumn(name="article_id", referencedColumnName="id")
+     *      @ORM\JoinColumn(name="article_id", referencedColumnName="id", cascade={"persist", "remove"})
      *  },
      *  inverseJoinColumns={
-     *      @ORM\JoinColumn(name="tag_id", referencedColumnName="id")
+     *      @ORM\JoinColumn(name="name", referencedColumnName="name", cascade={"persist", "remove"})
      *  }
      * )
      */
 
-    protected $tagGroup;
+    /**
+     * @var
+     */
+
+    protected $tags;
 
     public function __construct()
     {
-        $this->tagGroup = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
+
 
     /**
      * @ORM\Column(type="string", length=100)
+     * @Assert\NotBlank()
      */
     private $title;
 
@@ -57,12 +63,6 @@ class Article
      * @ORM\Column(type="date")
      */
     private $createData;
-
-    /**
-     * @var
-     */
-
-    protected $name;
 
     /**
      * Get id
@@ -146,16 +146,25 @@ class Article
         return $this->createData;
     }
 
-    public function setName($name)
+    public function getTags()
     {
-        //$this->name
-        $tag = new Tag();
-        $tag->setName($name);
-        return $this;
+        return $this->tags;
     }
 
-    public function getName(){
-        return $this->name;
+    public function setTags($tags)
+    {
+        $this->tags = $tags;
     }
 
+    protected $nameTag;
+
+    public function setNameTag($nameTag)
+    {
+        $this->nameTag = $nameTag;
+    }
+
+    public function getNameTag()
+    {
+        return $this->nameTag;
+    }
 }
